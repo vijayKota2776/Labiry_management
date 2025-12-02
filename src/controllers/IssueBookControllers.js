@@ -2,7 +2,7 @@ const IssueBookModel = require('../modules/IssueBookScheme');
 const Book = require('../modules/Books');
 const User = require('../modules/userSchema');
 
-// ISSUE BOOK
+
 const issueBook = async (req, res) => {
     try {
         const { bookId, bookName, studentId, studentName, issueDate, returnDate } = req.body;
@@ -28,13 +28,14 @@ const issueBook = async (req, res) => {
             studentName,
             issueDate,
             returnDate,
-            status: "ISSUED"
+            status: "ISSUED",
+            createdAt: Date.now()
         };
 
         const issueBookEntry = new IssueBookModel(newIssueBook);
         await issueBookEntry.save();
 
-        // Decrease book quantity
+
         book.quantity = book.quantity - 1;
         await book.save();
 
@@ -45,7 +46,7 @@ const issueBook = async (req, res) => {
     }
 };
 
-// RETURN BOOK
+
 const returnBook = async (req, res) => {
     try {
         const issueBookEntry = await IssueBookModel.findById(req.params.id);

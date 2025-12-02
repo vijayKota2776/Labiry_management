@@ -6,10 +6,10 @@ require('dotenv').config();
 
 const app = express();
 
-// Middleware to parse JSON
+
 app.use(express.json());
 
-// Request logger
+
 const requestLogger = (req, res, next) => {
     console.log(`${req.method} ${req.path} : ${new Date().toISOString()}`);
     next();
@@ -17,12 +17,12 @@ const requestLogger = (req, res, next) => {
 
 app.use(requestLogger);
 
-// Default route
+
 app.get('/', (req, res) => {
     res.json('Welcome to Library Management API');
 });
 
-// Health check route
+
 app.get('/health', (req, res) => {
     res.status(200).json({
         status: "OK",
@@ -30,11 +30,11 @@ app.get('/health', (req, res) => {
     });
 });
 
-// Routes
+
 app.use('/books', bookRouter);
 app.use('/issue-books', issueBookRouter);
 
-// Server Start
+
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
