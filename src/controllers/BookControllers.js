@@ -1,8 +1,6 @@
 const Book = require('../modules/Books');
 
 
-
-
 getAllBook=async(req,res)=>{
     try{
         const books=await Book.find();
