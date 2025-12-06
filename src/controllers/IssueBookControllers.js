@@ -3,73 +3,81 @@ const Book = require('../modules/Books');
 const User = require('../modules/userSchema');
 
 
-const issueBook = async (req, res) => {
+issueBook=async (request,response)=>{
     try {
-        const { bookId, bookName, studentId, studentName, issueDate, returnDate } = req.body;
 
-        const book = await Book.findById(bookId);
-        if (!book) {
-            return res.status(404).json({ message: 'Book not found' });
+        if(request.user.role==='STUDENT'){
+            return response.status(403).json({message:"You are not authorized to issue a book"});
         }
 
-        const student = await User.findById(studentId);
-        if (!student) {
-            return res.status(404).json({ message: 'Student not found' });
+        const {bookId,bookName,studentId,studentName,issueDate,returnDate}=request.body;
+
+        const book=await Book.findById(bookId);
+
+        if(!book){
+            return response.status(404).json({message:"Book not found"});
         }
 
-        if (book.quantity < 1) {
-            return res.status(400).json({ message: 'Book is not available' });
+        const student=await User.findById(studentId);
+
+        if(!student){
+            return response.status(404).json({message:"Student not found"});
         }
 
-        const newIssueBook = {
+        if(book.quantity<1){
+            return response.status(400).json({message:"Book is not available"});
+        }
+
+        const newIssueBook={
             bookId,
             bookName,
             studentId,
             studentName,
             issueDate,
             returnDate,
-            status: "ISSUED",
-            createdAt: Date.now()
+            status:"Issued"
         };
 
-        const issueBookEntry = new IssueBookModel(newIssueBook);
-        await issueBookEntry.save();
+        const issueBook=new IssueBook(newIssueBook);
+        await issueBook.save();
 
-
-        book.quantity = book.quantity - 1;
+        book.quantity=book.quantity-1;
         await book.save();
 
-        res.status(201).json({ message: 'Book was issued', data: issueBookEntry });
-
+        response.status(201).json({message:"Book issued successfully",data:issueBook});
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        response.status(500).json({message:error.message});
     }
 };
 
-
-const returnBook = async (req, res) => {
+returnBook=async (request,response)=>{
     try {
-        const issueBookEntry = await IssueBookModel.findById(req.params.id);
-        if (!issueBookEntry) {
-            return res.status(404).json({ message: 'Issued book not found' });
+
+        if(request.user.role==='STUDENT'){
+            return response.status(403).json({message:"You are not authorized to return a book"});
         }
 
-        if (issueBookEntry.status === "RETURNED") {
-            return res.status(400).json({ message: 'Book already returned' });
+        const issueBook=await IssueBook.findById(request.params.id);
+
+        if(!issueBook){
+            return response.status(404).json({message:"Issue book not found"});
         }
 
-        issueBookEntry.status = "RETURNED";
-        await issueBookEntry.save();
+        if(issueBook.status==="Returned"){
+            return response.status(400).json({message:"Book is already returned"});
+        }
 
-        const book = await Book.findById(issueBookEntry.bookId);
-        book.quantity = book.quantity + 1;
+        issueBook.status="Returned";
+        await issueBook.save();
+
+        const book=await Book.findById(issueBook.bookId);
+        book.quantity=book.quantity+1;
         await book.save();
 
-        res.status(200).json({ message: 'Book returned successfully', data: issueBookEntry });
-
+        response.status(200).json({message:"Book returned successfully",data:issueBook});
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        response.status(500).json({message:error.message});
     }
 };
 
-module.exports = { issueBook, returnBook };
+module.exports={issueBook,returnBook};

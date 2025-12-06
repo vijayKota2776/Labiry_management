@@ -1,22 +1,25 @@
 const jwt=require('jsonwebtoken');
-authMiddleWare=(req,res)=>{
-    try{
-        const {token}=req.headers;
+
+authMiddleware=(request,response,next)=>{
+    try {
+        const {token}=request.headers;
+
         if(!token){
-            return res.status(401).json({message:"Unauthrized"});
+            return response.status(401).json({message:"Unauthorized"});
         }
-        const decodedToken=jwt.verify(token,"ITM");
+
+        const decodedToken=jwt.verify(token,'timepass');
 
         if(!decodedToken){
-            res.status(401).json({message:"Tocken is invalid"});
+            return response.status(401).json({message:"Token is invalid"});
         }
-        req.user=decodedToken;
+
+        request.user=decodedToken;
+
         next();
-    }
-    catch(error)
-    {
-        res.status(500).json({message:error.message});
+    } catch (error) {
+        response.status(500).json({message:error.message});
     }
 };
 
-module.exports=authMiddleWare;
+module.exports=authMiddleware;
