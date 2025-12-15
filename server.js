@@ -7,20 +7,20 @@ const db = require('./src/config/db');
 
 const app = express();
 
-// Connect to Database
+
 db();
 
-// Middlewares
+
 app.use(express.json());
 
-// Request Logger
+
 const requestLogger = (req, res, next) => {
     console.log(`${req.method} ${req.url} | Time: ${new Date().toISOString()}`);
     next();
 };
 app.use(requestLogger);
 
-// Test Routes
+
 app.get('/', (req, res) => {
     res.json('Welcome To Library Management API');
 });
@@ -32,12 +32,12 @@ app.get('/health', (req, res) => {
     });
 });
 
-// Routers
+
 app.use('/books', bookRouter);
 app.use('/issue-books', issueBookRouter);
 app.use('/users', userRouter);
 
-// Server Port
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
